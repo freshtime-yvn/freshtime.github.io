@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshTime Խաղարկություն</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        background: linear-gradient(270deg, #a8edea, #fed6e3, #f6d365, #fda085);
+        background-size: 800% 800%;
+        animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 20px;
+        color: #ffffff;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .container {
+        max-width: 400px;
+        margin: 80px auto;
+        background: rgba(255,255,255,0.9);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        z-index: 10;
+        position: relative;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #2e7d32;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        background: #388e3c;
+    }
+
+    .admin-panel {
+        display: none;
+        margin-top: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    td, th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    th {
+        background: #2e7d32;
+        color: white;
+    }
+</style>
+</head>
+<body>
+
+<h1>FreshTime Խաղարկություն</h1>
+
+<div class="container">
+    <input type="text" id="email" placeholder="Մուտքագրեք ձեր Email կամ admin code">
+    <input type="text" id="code" placeholder="Մուտքագրեք կոդը">
+    <button onclick="addTicket()">Ավելացնել Տոմս</button>
+    <button onclick="checkTickets()">Ստուգել իմ տոմսերը</button>
+
+    <div class="admin-panel" id="adminPanel">
+        <h3>Admin Panel</h3>
+        <table id="usersTable">
+            <tr><th>Email</th><th>Տոմսեր</th><th>Փոխել</th></tr>
+        </table>
+    </div>
+</div>
+
+<script>
+// 200 եզակի կոդեր
+const VALID_CODES = [
+123456,234567,345678,456789,567890,678901,789012,890123,901234,112233,
+223344,334455,445566,556677,667788,778899,889900,990011,135791,246802,
+111222,222333,333444,444555,555666,666777,777888,888999,999000,112244,
+223355,334466,445577,556688,667799,778800,889911,990022,101112,121314,
+141516,161718,181920,202122,222324,242526,262728,282930,303132,323334,
+343536,363738,383940,404142,424344,444546,464748,484950,505152,525354,
+545556,565758,585960,606162,626364,646566,666768,686970,707172,727374,
+747576,767778,787980,808182,828384,848586,868788,888990,909192,929394,
+949596,969798,989900,876543,765432,654321,543210,432109,321098,210987,
+109876,908070,807060,706050,605040,504030,403020,302010,201000,100999,
+999888,888777,777666,666555,555444,444333,333222,222111,111000,101010,
+202020,303030,404040,505050,606060,707070,808080,909090,909091,909092,
+909093,909094,909095,909096,909097,909098,909099,111111,222222,333333,
+444444,555555,666666,777777,888888,999999,147258,258369,369147,741852,
+852963,963741,159753,753951,951357,357159,852456,654852,456258,258654,
+159357,357951,951159,111333,333555,555777,777999,999111,135135,246246,
+357357,468468,579579,681681,792792,803803,914914,123789,987321,564738
+];
+
+const ADMIN_CODE = "freshtimeadmin444";
+
+// LocalStorage structure
+let users = JSON.parse(localStorage.getItem('users')) || {};
+let usedCodes = JSON.parse(localStorage.getItem('usedCodes')) || [];
+
+function saveData() {
+    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('usedCodes', JSON.stringify(usedCodes));
+}
+
+function addTicket() {
+    const email = document.getElementById('email').value.trim();
+    const code = document.getElementById('code').value.trim();
+
+    if (!email || !code) {
+        alert("Խնդրում ենք լրացնել բոլոր դաշտերը");
+        return;
+    }
+
+    if (email === ADMIN_CODE) {
+        showAdminPanel();
+        return;
+    }
+
+    if (!VALID_CODES.includes(parseInt(code))) {
+        alert("Սխալ կոդ");
+        return;
+    }
+
+    if (usedCodes.includes(code)) {
+        alert("Այս կոդը արդեն օգտագործված է");
+        return;
+    }
+
+    if (!users[email]) {
+        users[email] = 0;
+    }
+    users[email]++;
+    usedCodes.push(code);
+    saveData();
+
+    alert("Տոմսը հաջողությամբ ավելացվեց");
+}
+
+function checkTickets() {
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+        alert("Մուտքագրեք email-ը");
+        return;
+    }
+    if (users[email]) {
+        alert(`Դուք ունեք ${users[email]} տոմս`);
+    } else {
+        alert("Տոմսեր չկան");
+    }
+}
+
+function showAdminPanel() {
+    const panel = document.getElementById('adminPanel');
+    panel.style.display = 'block';
+    const table = document.getElementById('usersTable');
+    table.innerHTML = "<tr><th>Email</th><th>Տոմսեր</th><th>Փոխել</th></tr>";
+    for (let email in users) {
+        const row = `<tr>
+            <td>${email}</td>
+            <td>${users[email]}</td>
+            <td><input type='number' value='${users[email]}' onchange='updateTickets("${email}", this.value)'></td>
+        </tr>`;
+        table.innerHTML += row;
+    }
+}
+
+function updateTickets(email, newValue) {
+    users[email] = parseInt(newValue);
+    saveData();
+}
+</script>
+</body>
+</html>
